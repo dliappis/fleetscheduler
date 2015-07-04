@@ -1,0 +1,36 @@
+__fleetdef:
+  schema: 1
+
+servicegroups:
+  webapp1:
+    copies: 1
+    containers:
+      redis:
+        description: Redis instance
+        image: redis
+        ports:
+          # public:local
+          - 9999:3333
+        limits:
+          memory: 0.2g
+          cpu: 0.5
+        conflicts:
+          - redis*.service
+      helloworld:
+        description: Hello World web app
+        image: tutum/hello-world
+        ports:
+          - 8888:80
+        # Note: list order is preserved
+        after:
+          - redis.service
+        # requires:
+        #   - redis.service
+        # bindsto:
+        #   - redis.service
+        limits:
+          memory: 0.2g
+          cpu: 0.5
+        conflicts:
+          - helloworld*.service
+        
