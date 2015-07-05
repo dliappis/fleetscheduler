@@ -1,16 +1,16 @@
 [Unit]
 Description = Gliderlabs registrator
-#After = docker.service
+After = docker.service
 
 [Service]
 EnvironmentFile = /etc/environment
 TimeoutStartSec = 0
-#KillMode = none
+KillMode = none
 ExecStartPre = -/usr/bin/docker kill registrator
 ExecStartPre = -/usr/bin/docker rm registrator
-#ExecStartPre = /usr/bin/docker pull gliderlabs/registrator
+ExecStartPre = /usr/bin/docker pull gliderlabs/registrator
 ExecStart = /bin/sh -c "/usr/bin/docker run --name registrator -v /var/run/docker.sock:/tmp/docker.sock -h $HOSTNAME gliderlabs/registrator -ip ${COREOS_PRIVATE_IPV4} etcd://${COREOS_PRIVATE_IPV4}:4001/services"
 ExecStop = /usr/bin/docker stop registrator
 
-#[X-Fleet]
-#Global = true
+[X-Fleet]
+Global = true
