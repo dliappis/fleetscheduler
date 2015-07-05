@@ -19,6 +19,7 @@ servicegroups:
       helloworld:
         description: Hello World web app
         image: tutum/hello-world
+        domain: www.mytestapp.org
         # ports:
         #   - 8888:80
         # Note: list order is preserved

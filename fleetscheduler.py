@@ -7,6 +7,8 @@ import logging
 import pdb
 import ConfigParser
 import os
+import json
+import urllib2
 
 class Unit(object):
     pass
@@ -27,8 +29,42 @@ def main():
 
     servicegroups_names = [i for i in fleetdef['servicegroups']]
     for containerdef in fleetdef['servicegroups'][servicegroups_names[0]]['containers']:
-        unitstring = create_unit_from_containerdef(containerdef, fleetdef['servicegroups'][servicegroups_names[0]]['containers'][containerdef])
+        service_params = create_unit_from_containerdef(containerdef, fleetdef['servicegroups'][servicegroups_names[0]]['containers'][containerdef])
 
+        # Check if we need to register the domain locally
+        if service_params != None:
+            #etcdresponse = urllib2.urlopen("http://172.17.8.101:4001/v1/keys/services/%s" % (service_params["servicename"],) ).read()
+        
+            #servicekeys = etcdresponse["value"]
+            #print servicekeys
+            fp = open('domains/domains.txt',"r")
+            # File is <domain> <serviceparamname>
+            # e.g. www.mytestapp.org hello-world
+            domainfilecontents = fp.readlines()
+            fp.close()
+            domainfilecontents = [i.strip() for i in domainfilecontents]
+            domaintable = {}
+
+            try:
+                for entries in domainfilecontents:
+                    domain,servicename=entries.split(' ')
+                    domaintable[domain]=servicename
+                domaintable[service_params["domain"]]=service_params["servicename"]
+            except ValueError:
+                # Empty file
+                domaintable[service_params['domain']]=service_params['servicename']
+            if len(domainfilecontents)==0:
+                pdb.set_trace()
+
+                # Empty file
+                domaintable[service_params['domain']]=service_params['servicename']
+
+            fp = open('domains/domains.txt','w')
+            print domaintable
+            for domain,servicename in domaintable.iteritems():
+                fp.write("%s %s\n" % (domain,servicename) )
+            fp.close()
+                
 def create_unit_from_containerdef(unitname, container_conf=""):
     unit_filename = "tmp/%s.service" % (unitname,)
     
@@ -92,6 +128,15 @@ def create_unit_from_containerdef(unitname, container_conf=""):
 
     # Config.write(cfgfile)
     cfgfile.close()
+
+    ''' 
+    Return the container name suffix, which is defined as service name by registrator
+    if the container defines a domain
+    '''
+    if "domain" in container_conf:
+        return { "servicename" : container_conf["image"].split('/')[-1], "domain" : container_conf["domain"] }
+    else:
+        return None
  
 ## TODO Use argparse instead
 def parseargs():
