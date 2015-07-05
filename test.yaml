@@ -10,7 +10,7 @@ servicegroups:
         image: redis
         ports:
           # public:local
-          - 9999:3333
+          - 9999:6379
         limits:
           memory: 0.2g
           cpu: 0.5
@@ -19,8 +19,8 @@ servicegroups:
       helloworld:
         description: Hello World web app
         image: tutum/hello-world
-        ports:
-          - 8888:80
+        # ports:
+        #   - 8888:80
         # Note: list order is preserved
         after:
           - redis.service

@@ -60,7 +60,12 @@ def create_unit_from_containerdef(unitname, container_conf=""):
     print >>cfgfile, "ExecStartPre = -/usr/bin/docker kill %s" % (unitname,)
     print >>cfgfile, "ExecStartPre = -/usr/bin/docker rm %s" % (unitname,)
     print >>cfgfile, "ExecStartPre = /usr/bin/docker pull %s" % (container_conf["image"],)
-    portarray=["-p %s" % (i,) for i in container_conf["ports"]]
+    if "ports" in container_conf:
+        portarray=["-p %s" % (i,) for i in container_conf["ports"]]
+    else:
+        # Allow docker to auto assign external ports to exposed ports
+        portarray = ["-P"]
+
     print >>cfgfile, "ExecStart = /usr/bin/docker run --name %s %s %s" % (unitname,portarray[0],container_conf["image"])
     print >>cfgfile, "ExecStop = /usr/bin/docker stop %s" % (unitname,)
 
