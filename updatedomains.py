@@ -13,11 +13,12 @@ import time
 
 fp = open('domains/domains.txt','r')
 domainfilecontents = fp.readlines()
-domainfilecontents = [i.strip() for i in domainfilecontents]
+domainfilecontents = [i.strip() for i in domainfilecontents] # Remove LF at end of each line
 fp.close()
 
 domaintable = {}
 
+# Parse columns of text file 'domains.txt'
 try:
     for entries in domainfilecontents:
         domain,servicename=entries.split(' ')
@@ -42,7 +43,7 @@ print "Updated hosttable:"
 for itr in json_etcd_dir["node"]["nodes"]:
     servicekey = itr["key"].split('/')[-1] # e.g. /service/redis --> redis
     current_etcd_struct[servicekey] = {}
-    print itr
+    #print itr
     try:
         for children in itr["nodes"]:
             uniqkey = children["key"]
@@ -50,7 +51,8 @@ for itr in json_etcd_dir["node"]["nodes"]:
             current_etcd_struct[servicekey][uniqkey]=uniqvalue
 
             if servicekey in domaintable.keys():
-                print "Domain %s = %s" % (servicekey, uniqvalue)
+                #print "etcd key: %s identified inside %s" % (servicekey,domaintable.keys())
+                print "Domain %s = %s" % (domaintable[servicekey], uniqvalue)
     except:
         # Entry removed
         continue

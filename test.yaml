@@ -8,21 +8,27 @@ servicegroups:
       redis:
         description: Redis instance
         image: redis
-        ports:
+        wants:
+          - helloworld.service
+        before:
+          - redis.service
+        #ports:
           # public:local
-          - 9999:6379
+        #  - 9999:6379
         limits:
           memory: 0.2g
           cpu: 0.5
-        conflicts:
-          - redis*.service
+        # conflicts:
+        #   - redis*.service
       helloworld:
         description: Hello World web app
         image: tutum/hello-world
         domain: www.mytestapp.org
-        # ports:
-        #   - 8888:80
+        ports:
+          - 8888:80
         # Note: list order is preserved
+        wants:
+          - redis.service
         after:
           - redis.service
         # requires:
@@ -32,6 +38,6 @@ servicegroups:
         limits:
           memory: 0.2g
           cpu: 0.5
-        conflicts:
-          - helloworld*.service
+        # conflicts:
+        #   - helloworld*.service
         

@@ -9,20 +9,21 @@ import ConfigParser
 import os
 import json
 import urllib2
+from subprocess import call
 
 class Unit(object):
     pass
 
 
 def main():
-    if len(sys.argv)<2:
-        logging.warning("You need to supply the yaml conf file as a parameter")
+    if len(sys.argv)!=3:
+        logging.warning("Use arguments like start <yamlfile> or destroy <yaml.file")
         sys.exit(1)
     
     fleetdef = ""
 
     try:
-        fp = open(sys.argv[1],'r')
+        fp = open(sys.argv[2],'r')
         fleetdef = yaml.load(fp)
     except:
         logging.error("Unable to open or parse file %s" % (sys.argv[1]))
@@ -54,7 +55,7 @@ def main():
                 # Empty file
                 domaintable[service_params['domain']]=service_params['servicename']
             if len(domainfilecontents)==0:
-                pdb.set_trace()
+                #pdb.set_trace()
 
                 # Empty file
                 domaintable[service_params['domain']]=service_params['servicename']
@@ -64,7 +65,12 @@ def main():
             for domain,servicename in domaintable.iteritems():
                 fp.write("%s %s\n" % (domain,servicename) )
             fp.close()
-                
+        if sys.argv[1] == "start":
+            call(["fleet/bin/fleetctl","submit","tmp/%s.service" % (containerdef,)])
+            call(["fleet/bin/fleetctl","start","tmp/%s.service" % (containerdef,)])
+        elif sys.argv[1] == "destroy":
+            call(["fleet/bin/fleetctl","destroy","tmp/%s.service" % (containerdef,)])
+ 
 def create_unit_from_containerdef(unitname, container_conf=""):
     unit_filename = "tmp/%s.service" % (unitname,)
     
@@ -79,7 +85,7 @@ def create_unit_from_containerdef(unitname, container_conf=""):
     # Config.add_section('Unit')
 
     print >>cfgfile, "[Unit]"
-    unit_section_clauses = ["Description","After","Requires","BindsTo"]
+    unit_section_clauses = ["Description","After","Requires","BindsTo","Wants","Before"]
     for unitclause in unit_section_clauses:
         try:
             values = container_conf[unitclause.lower()]
