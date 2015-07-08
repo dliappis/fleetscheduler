@@ -8,8 +8,10 @@ servicegroups:
       redis:
         description: Redis instance
         image: redis
+        # Use wants to ensure container gets killed when the other one does
         wants:
           - helloworld.service
+        # Use before or after to declare order to start up. More than one entries can be defined
         before:
           - redis.service
         #ports:
@@ -38,6 +40,7 @@ servicegroups:
         limits:
           memory: 0.2g
           cpu: 0.5
+        # Define here lists for MachineID, MachineOf, MachineMedata, Conflicts, Global
         # conflicts:
         #   - helloworld*.service
         
