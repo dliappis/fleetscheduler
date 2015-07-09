@@ -21,7 +21,7 @@ for i in allrecords:
             dnsdict[domainname] = {'port': portnum }
     else:
         domainname = i.split(' ')[0]
-        ipaddr = i.split('\t')[-1]
+        ipaddr = re.split('\t| ',i)[-1]
         try:
             dnsdict[domainname]['host'] = ipaddr
         except KeyError:
