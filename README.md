@@ -3,6 +3,8 @@ Scheduler and orchestrator for fleet
 
 # Quick setup
 
+## coreos
+
 1. Clone coreos-vagrant
 
 2. Get your etcd discovery token ` curl -i -L https://discovery.etcd.io/new`
@@ -13,7 +15,9 @@ Scheduler and orchestrator for fleet
 
 5. Start your coreos cluster `vagrant up`
 
-6. On your workstation, compile + run skydns2:
+## skydns2
+
+* On your workstation, compile + run skydns2:
 
 ```bash
 go get github.com/skynetservices/skydns
@@ -23,7 +27,7 @@ export ETCD_MACHINES='http://172.17.8.102:4001' # use any coreos ip here
 ./skydns2
 ```
 
-7. On a coreos machine or using etcd http api calls create a skydns2 conf:
+* On a coreos machine or using etcd http api calls create a skydns2 conf:
 
 ```
 etcdctl set /skydns/config '{"dns_addr":"127.0.0.1:5354","ttl":3600, "domain":"dimitris.io","nameservers": ["8.8.8.8:53","8.8.4.4:53"]}'
@@ -31,7 +35,9 @@ etcdctl set /skydns/config '{"dns_addr":"127.0.0.1:5354","ttl":3600, "domain":"d
 
 This will force skydns to look for auto registered (gliderlabs/registrator) data under /skydns/local/io/dimitris
 
-8. Use the following fleet unit file to start gliderlabs/registrator, located in this repo as `registrator-skydns2.service`
+## start registrator
+
+* Use the following fleet unit file to start gliderlabs/registrator, located in this repo as `registrator-skydns2.service`
 
 ```ini
 [Unit]
@@ -68,14 +74,15 @@ ExecStop=/usr/bin/docker stop %p
 Global=true
 ```
 
-9. Run `./fleetscheduler create test.yaml`
+## start fleet units
+* Run `./fleetscheduler create test.yaml`
 
 Note: test.yaml defines two services helloworld (to use domainname: mytestapp.dimitris.io) and redis
 
-10. Run `sudo ./hosts_updater.py #` to update your /etc/hosts
+* Run `sudo ./hosts_updater.py #` to update your /etc/hosts
 
 Note: (TODO) this will be converted to a daemon to get triggered when etcd skydns dir gets updated
 
-11. check /etc/hosts. Visit <defineddomainname>.dimitris.io on your browser. e.g. mytestapp.dimitris.io
+* check /etc/hosts. Visit `<defineddomainname>.dimitris.io` on your browser. e.g. [mytestapp.dimitris.io](http://mytestapp.dimitris.io)
 
-12. Destroy services using `./fleetscheduler destroy test.yaml`
+* Destroy services using `./fleetscheduler destroy test.yaml`
