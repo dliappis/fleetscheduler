@@ -4,6 +4,7 @@ __fleetdef:
 servicegroups:
   webapp1:
     copies: 1
+    env: prod
     containers:
       redis:
         description: Redis instance
@@ -13,7 +14,7 @@ servicegroups:
           - helloworld.service
         # Use before or after to declare order to start up. More than one entries can be defined
         before:
-          - redis.service
+          - helloworld.service
         #ports:
           # public:local
         #  - 9999:6379
@@ -25,9 +26,9 @@ servicegroups:
       helloworld:
         description: Hello World web app
         image: tutum/hello-world
-        domain: www.mytestapp.org
+        domain: mytestapp
         ports:
-          - 8888:80
+          - 80:80
         # Note: list order is preserved
         wants:
           - redis.service
