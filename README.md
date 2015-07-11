@@ -96,3 +96,18 @@ Note: (TODO) this will be converted to a daemon to get triggered when etcd skydn
 * check /etc/hosts. Visit `<defineddomainname>.dimitris.io` on your browser. e.g. [mytestapp.dimitris.io](http://mytestapp.dimitris.io)
 
 * Destroy services using `./fleetscheduler destroy test.yaml`
+
+### Options for fleetscheduler
+
+1. specify service group.
+
+e.g. start containers associated with prod-webapp1 servicegroup only:
+
+./fleetscheduler.py start test.yaml -s prod-webapp1
+
+destroy containers in staging servicegroup:
+
+./fleetscheduler.py destroy test.yaml -s staging-webapp1
+
+2. if you don't specify -s (--servicegroup) all servicegroups will be affected
+
