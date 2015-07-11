@@ -15,6 +15,16 @@ Scheduler and orchestrator for fleet
 
 5. Start your coreos cluster `vagrant up`
 
+6. Install fleetctl on your workstation.
+
+7. Before all next steps ensure you have an env var pointing to a coreos working ssh endpoint:
+
+```bash
+ssh-agent bash
+ssh-add ~/.vagrant.d/insecure_private_key
+export FLEETCTL_TUNNEL=127.0.0.1:2222 # Use vagrant ssh-config to figure out the ip:port for any coreos vm
+```
+
 ## skydns2
 
 * On your workstation, compile + run skydns2:
