@@ -33,7 +33,7 @@ servicegroups:
         wants:
           - redis.service
         after:
-          - redis.service
+          - helloworld*.service
         # requires:
         #   - redis.service
         # bindsto:
@@ -43,8 +43,8 @@ servicegroups:
           cpu: 0.5
         # Define here lists for MachineID, MachineOf, MachineMedata, Conflicts, Global
         conflicts:
-            - staging-helloworld*.service
-            - staging-redis*.service
+          - staging-helloworld*.service
+          - staging-redis*.service
   staging-webapp1:
     copies: 1
     env: staging
@@ -56,8 +56,6 @@ servicegroups:
         wants:
           - helloworld.service
         # Use before or after to declare order to start up. More than one entries can be defined
-        before:
-          - helloworld.service
         #ports:
           # public:local
         #  - 9999:6379
@@ -85,6 +83,5 @@ servicegroups:
           memory: 0.2g
           cpu: 0.5
         # Define here lists for MachineID, MachineOf, MachineMedata, Conflicts, Global
-        # conflicts:
-        #   - helloworld*.service
-        
+        conflicts:
+          - prod*.service
