@@ -98,9 +98,10 @@ def create_unit_from_containerdef(originalunitname, container_conf="", env=""):
     for xfleetclause in x_fleet_section_clauses:
         try:
             values = container_conf[xfleetclause.lower()]
-            if type(values) == type([]):
-                values = ",".join(values)
-            print >>cfgfile, "%s = %s" % (xfleetclause, values)
+            # if type(values) == type([]):
+            #     values = ",".join(values)
+            for xfleetvalue in values:
+                print >>cfgfile, "%s = %s" % (xfleetclause, xfleetvalue)
         except KeyError:
             continue
     
