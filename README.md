@@ -103,11 +103,14 @@ Note: (TODO) this will be converted to a daemon to get triggered when etcd skydn
 
 e.g. start containers associated with prod-webapp1 servicegroup only:
 
+```bash
 ./fleetscheduler.py start test.yaml -s prod-webapp1
-
+```
 destroy containers in staging servicegroup:
 
+```bash
 ./fleetscheduler.py destroy test.yaml -s staging-webapp1
+```
 
 2. if you don't specify -s (--servicegroup) all servicegroups will be affected
 
