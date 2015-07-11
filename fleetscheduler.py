@@ -5,10 +5,7 @@ import argparse
 import sys
 import logging
 import pdb
-import ConfigParser
-import os
-import json
-import urllib2
+
 from subprocess import call
 
 class Unit(object):
@@ -16,34 +13,43 @@ class Unit(object):
 
 
 def main():
-    if len(sys.argv)!=3:
-        logging.warning("Use arguments like start <yamlfile> or destroy <yaml.file")
-        sys.exit(1)
-    
+    args = parseargs()
+
     fleetdef = ""
 
     try:
-        fp = open(sys.argv[2],'r')
+        fp = open(args.yamldeffile,'r')
         fleetdef = yaml.load(fp)
     except:
         logging.error("Unable to open or parse file %s" % (sys.argv[1]))
-    #servicegroups_names = [i for i in fleetdef['servicegroups']]
-    for sgroup in fleetdef['servicegroups']:
+
+    # Has the user limited processing to a specific service group
+    if args.servicegroup:
+        sgroup = args.servicegroup
         process_service_group(servicegroups_name=sgroup,
                               copies=fleetdef['servicegroups'][sgroup]['copies'],
                               env=fleetdef['servicegroups'][sgroup]['env'],
-                              container_list=fleetdef['servicegroups'][sgroup]['containers'])
+                              container_list=fleetdef['servicegroups'][sgroup]['containers'],
+                              action=args.subparser_name)
+    else:
+        for sgroup in fleetdef['servicegroups']:
+            process_service_group(servicegroups_name=sgroup,
+                                  copies=fleetdef['servicegroups'][sgroup]['copies'],
+                                  env=fleetdef['servicegroups'][sgroup]['env'],
+                                  container_list=fleetdef['servicegroups'][sgroup]['containers'],
+                                  action=args.subparser_name)
 
-def process_service_group(servicegroups_name, copies, env, container_list):
+def process_service_group(servicegroups_name, copies, env, container_list, action=""):
     for containerdef in container_list:
+        # TODO parse results for success/fail
         service_params = create_unit_from_containerdef(containerdef, container_list[containerdef], env)
 
-        if sys.argv[1] == "start":
+        if action == 'start':
             call(["fleet/bin/fleetctl","submit","tmp/%s-%s.service" % (env,containerdef,)])
             call(["fleet/bin/fleetctl","start","tmp/%s-%s.service" % (env,containerdef,)])
-        elif sys.argv[1] == "destroy":
+        elif action == "destroy":
             call(["fleet/bin/fleetctl","destroy","tmp/%s-%s.service" % (env,containerdef,)])
- 
+
 def create_unit_from_containerdef(originalunitname, container_conf="", env=""):
     if env != "":
         unitname = "%s-%s" % (env,originalunitname)
@@ -111,8 +117,29 @@ def create_unit_from_containerdef(originalunitname, container_conf="", env=""):
  
 ## TODO Use argparse instead
 def parseargs():
-    parser = argparse.ArgumentParser(prog='fleetscheduler', usage='%(prog)s [options]')
-    parser.add_argument()
+    parser = argparse.ArgumentParser(prog='fleetscheduler', usage='%(prog)s')
+    subparsers = parser.add_subparsers(title="actions", dest="subparser_name")
+    parser_start = subparsers.add_parser("start",
+                                         help="submit and launch all servicegroups in the yaml file")
+    parser_start.add_argument("-s","--servicegroup",
+                              help="limit action on specific service group in the yaml file")
+
+    parser_start.add_argument("yamldeffile",
+                              help="MANDATORY: the yaml def file")
+
+    parser_destroy = subparsers.add_parser("destroy",
+                                           help="destroy all servicesgroups specified in the yaml file")
+    parser_destroy.add_argument("-sg","--servicegroup",
+                                help="limit action on specific service group in the yaml file")
+    parser_destroy.add_argument("yamldeffile",
+                                help="MANDATORY: the yaml def file")
+
+
+    args = parser.parse_args()
+
+    ## TODO this is ugly need to create a proper class to encapsulate things
+    return args
+
 
 if __name__ == '__main__':
     main()
