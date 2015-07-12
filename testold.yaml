@@ -1,0 +1,87 @@
+__fleetdef:
+  schema: 1
+
+servicegroups:
+  prod-webapp1:
+    copies: 1
+    env: prod
+    containers:
+      redis:
+        description: Redis instance
+        image: redis
+        # Use wants to ensure container gets killed when the other one does
+        wants:
+          - helloworld.service
+        # Use before or after to declare order to start up. More than one entries can be defined
+        before:
+          - helloworld.service
+        #ports:
+          # public:local
+        #  - 9999:6379
+        limits:
+          memory: 0.2g
+          cpu: 0.5
+        # conflicts:
+        #   - redis*.service
+      helloworld:
+        description: Hello World web app
+        image: tutum/hello-world
+        domain: prodtestapp
+        ports:
+          - 80:80
+        # Note: list order is preserved
+        wants:
+          - redis.service
+        after:
+          - helloworld*.service
+        # requires:
+        #   - redis.service
+        # bindsto:
+        #   - redis.service
+        limits:
+          memory: 0.2g
+          cpu: 0.5
+        # Define here lists for MachineID, MachineOf, MachineMedata, Conflicts, Global
+        conflicts:
+          - staging-helloworld*.service
+          - staging-redis*.service
+  staging-webapp1:
+    copies: 1
+    env: staging
+    containers:
+      redis:
+        description: Redis instance
+        image: redis
+        # Use wants to ensure container gets killed when the other one does
+        wants:
+          - helloworld.service
+        # Use before or after to declare order to start up. More than one entries can be defined
+        #ports:
+          # public:local
+        #  - 9999:6379
+        limits:
+          memory: 0.2g
+          cpu: 0.5
+        # conflicts:
+        #   - redis*.service
+      helloworld:
+        description: Hello World web app
+        image: tutum/hello-world
+        domain: stagingtestapp
+        ports:
+          - 80:80
+        # Note: list order is preserved
+        wants:
+          - redis.service
+        after:
+          - redis.service
+        # requires:
+        #   - redis.service
+        # bindsto:
+        #   - redis.service
+        limits:
+          memory: 0.2g
+          cpu: 0.5
+        # Define here lists for MachineID, MachineOf, MachineMedata, Conflicts, Global
+        conflicts:
+          - prod*.service
