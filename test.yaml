@@ -11,10 +11,10 @@ servicegroups:
         image: redis
         # Use wants to ensure container gets killed when the other one does
         wants:
-          - helloworld.service
+          - prod-helloweather.service
         # Use before or after to declare order to start up. More than one entries can be defined
         before:
-          - helloworld.service
+          - prod-helloweather.service
         #ports:
           # public:local
         #  - 9999:6379
@@ -23,28 +23,36 @@ servicegroups:
           cpu: 0.5
         # conflicts:
         #   - redis*.service
-      helloworld:
-        description: Hello World web app
-        image: tutum/hello-world
-        domain: prodtestapp
+      helloweather:
+        description: Test weather app dependeing on redis
+        image: luebken/currentweather
+        # OPTION: define domain name
+        domain: prodhelloweather
+        # OPTIONAL: define list of port associations
         ports:
-          - 80:80
+          - 80:1337
+        # OPTIONAL: define list of link associations
+        # Use the container name for links, skip the .service bit
+        links:
+          - prod-redis:redis
+        # OPTIONAL: define wants/after keywords
         # Note: list order is preserved
         wants:
-          - redis.service
+          - prod-redis.service
         after:
-          - helloworld*.service
-        # requires:
-        #   - redis.service
-        # bindsto:
-        #   - redis.service
+          - prod-redis*.service
+        # OPTIONAL: define limits for container
         limits:
           memory: 0.2g
           cpu: 0.5
+        # OPTIONAL:
         # Define here lists for MachineID, MachineOf, MachineMedata, Conflicts, Global
+        # define all those as lowercase
         conflicts:
           - staging-helloworld*.service
           - staging-redis*.service
+        machineof:
+          - prod-redis.service
   staging-webapp1:
     copies: 1
     env: staging
@@ -75,10 +83,6 @@ servicegroups:
           - redis.service
         after:
           - redis.service
-        # requires:
-        #   - redis.service
-        # bindsto:
-        #   - redis.service
         limits:
           memory: 0.2g
           cpu: 0.5
