@@ -6,7 +6,7 @@ import sys
 import logging
 import pdb
 
-from subprocess import call
+from subprocess import call,Popen
 
 class Unit(object):
     pass
@@ -46,7 +46,7 @@ def process_service_group(servicegroups_name, copies, env, container_list, actio
 
         if action == 'start':
             call(["fleet/bin/fleetctl","submit","tmp/%s-%s.service" % (env,containerdef,)])
-            call(["fleet/bin/fleetctl","start","tmp/%s-%s.service" % (env,containerdef,)])
+            Popen(["fleet/bin/fleetctl","start","tmp/%s-%s.service" % (env,containerdef,)])
         elif action == "destroy":
             call(["fleet/bin/fleetctl","destroy","tmp/%s-%s.service" % (env,containerdef,)])
 
@@ -90,7 +90,12 @@ def create_unit_from_containerdef(originalunitname, container_conf="", env=""):
     if "domain" in container_conf:
         domainenv = "-e SERVICE_ID=%s" % (container_conf['domain'],)
 
-    print >>cfgfile, "ExecStart = /usr/bin/docker run --name %s %s %s %s" % (unitname,domainenv,portarray[0],container_conf["image"])
+    linkarray=[""]
+    if "links" in container_conf:
+        linkarray=["--link %s" % (i,) for i in container_conf["links"]]
+
+    # TODO support more than one ports or link definitions
+    print >>cfgfile, "ExecStart = /usr/bin/docker run --name %s %s %s %s %s" % (unitname,domainenv,linkarray[0],portarray[0],container_conf["image"])
     print >>cfgfile, "ExecStop = /usr/bin/docker stop %s" % (unitname,)
 
     print >>cfgfile, "\n[X-Fleet]"
