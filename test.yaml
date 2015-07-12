@@ -68,8 +68,8 @@ servicegroups:
         description: Hello World web app
         image: tutum/hello-world
         domain: stagingtestapp
-        # ports:
-        #   - 80:80
+        ports:
+          - 80:80
         # Note: list order is preserved
         wants:
           - redis.service
